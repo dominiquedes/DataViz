@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CSV Data Visualizer</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
+</head>
+<body>
+    <div class="container">
+        <div class="card">
+            <div class="header">
+                <h1>CSV Data Analyzer</h1>
+                <p>Upload your CSV file to generate insights and visualizations</p>
+            </div>
+
+            {% if error %}
+            <div class="error">
+                {{ error }}
+            </div>
+            {% endif %}
+
+            <form class="upload-form" method="POST" action="/analyze" enctype="multipart/form-data">
+                <div class="file-input-wrapper">
+                    <input type="file" name="file" accept=".csv" required class="file-input">
+                    <div class="upload-progress"></div>
+                </div>
+                <button type="submit" class="btn">Analyze Data</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const fileInput = document.querySelector('.file-input');
+            const fileWrapper = document.querySelector('.file-input-wrapper');
+            const progressBar = document.querySelector('.upload-progress');
+            
+            fileInput.addEventListener('change', function(e) {
+                if (this.files && this.files[0]) {
+                    // Start upload animation
+                    fileInput.classList.add('uploading');
+                    
+                    // Simulate progress (you can replace this with actual upload progress)
+                    let progress = 0;
+                    const interval = setInterval(() => {
+                        progress += 2;
+                        progressBar.style.width = `${progress}%`;
+                        
+                        if (progress >= 100) {
+                            clearInterval(interval);
+                            fileInput.classList.remove('uploading');
+                            fileInput.classList.add('uploaded');
+                            fileWrapper.classList.add('uploaded');
+                            
+                            // Remove the uploaded state after animation
+                            setTimeout(() => {
+                                fileInput.classList.remove('uploaded');
+                                fileWrapper.classList.remove('uploaded');
+                            }, 2000);
+                        }
+                    }, 20);
+                }
+            });
+
+            // Reset the upload progress when the form is submitted
+            document.querySelector('.upload-form').addEventListener('submit', function() {
+                progressBar.style.width = '0';
+                fileInput.classList.remove('uploading', 'uploaded');
+                fileWrapper.classList.remove('uploaded');
+            });
+        });
+    </script>
+</body>
+</html>

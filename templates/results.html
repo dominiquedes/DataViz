@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analysis Results</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <div class="card">
+            <h2>Analysis Results</h2>
+            
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <h4>Dataset Overview</h4>
+                    <p>Total Rows: {{ stats.total_rows }}</p>
+                    <p>Total Columns: {{ stats.total_columns }}</p>
+                </div>
+                
+                <div class="stat-card">
+                    <h4>Columns</h4>
+                    <ul>
+                        {% for column in stats.columns %}
+                        <li>{{ column }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                
+                <div class="stat-card">
+                    <h4>Missing Values</h4>
+                    <ul>
+                        {% for column, count in stats.missing_values.items() %}
+                        <li>{{ column }}: {{ count }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+
+            <h3>Visualizations</h3>
+            <div class="visualization-grid">
+                {% for column, plot in plots.items() %}
+                <div class="viz-card">
+                    <h4>{{ column }}</h4>
+                    <img src="data:image/png;base64,{{ plot }}" alt="Plot for {{ column }}">
+                </div>
+                {% endfor %}
+            </div>
+
+            {% if pca_plot %}
+            <h3>Principal Component Analysis</h3>
+            <div class="viz-card">
+                <img src="data:image/png;base64,{{ pca_plot }}" alt="PCA Plot">
+            </div>
+            {% endif %}
+
+            {% if clustering_plot %}
+            <h3>K-Means Clustering</h3>
+            <div class="viz-card">
+                <img src="data:image/png;base64,{{ clustering_plot }}" alt="Clustering Plot">
+            </div>
+            {% endif %}
+
+            <a href="/" class="back-link">← Back to Upload</a>
+        </div>
+    </div>
+</body>
+</html>
