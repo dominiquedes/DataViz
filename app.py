@@ -34,24 +34,30 @@ def filter_outliers(df):
 def generate_plot(df, column):
     plt.clf()
     fig, ax = plt.subplots(figsize=(8, 5))
-    
+
     if df[column].dtype in ['int64', 'float64']:
-        sns.histplot(data=df, x=column, ax=ax, kde=True)
-        ax.set_title(f'Histogram: {column}')
+        sns.histplot(data=df, x=column, ax=ax, kde=True, color='skyblue', edgecolor='black')
+        ax.set_title(f'Distribution of "{column}"', fontsize=14)
+        ax.set_xlabel(column, fontsize=12)
+        ax.set_ylabel("Frequency", fontsize=12)
+
     elif df[column].dtype == 'object':
         value_counts = df[column].value_counts().nlargest(10)
         if len(value_counts) > 1:
-            ax.bar(value_counts.index, value_counts.values)
-            ax.set_title(f'Bar Chart: {column}')
+            sns.barplot(x=value_counts.index, y=value_counts.values, ax=ax, palette='muted')
+            ax.set_title(f'Top 10 Most Frequent Values in "{column}"', fontsize=14)
+            ax.set_xlabel(column, fontsize=12)
+            ax.set_ylabel("Count", fontsize=12)
             ax.set_xticklabels(value_counts.index, rotation=45, ha='right')
         else:
             ax.pie(value_counts.values, labels=value_counts.index, autopct='%1.1f%%')
-            ax.set_title(f'Pie Chart: {column}')
+            ax.set_title(f'Pie Chart of "{column}"', fontsize=14)
+
     else:
         return None
 
-    img = io.BytesIO()
     plt.tight_layout()
+    img = io.BytesIO()
     plt.savefig(img, format='png', bbox_inches='tight')
     img.seek(0)
     plt.close(fig)
@@ -70,10 +76,11 @@ def perform_pca(df):
 
     plt.clf()
     fig, ax = plt.subplots(figsize=(8, 6))
-    ax.scatter(pca_result[:, 0], pca_result[:, 1], alpha=0.7)
-    ax.set_title("PCA (2 components)")
-    ax.set_xlabel("Principal Component 1")
-    ax.set_ylabel("Principal Component 2")
+    scatter = ax.scatter(pca_result[:, 0], pca_result[:, 1], alpha=0.7, c='royalblue')
+    ax.set_title("PCA Projection (2 Components)", fontsize=14)
+    ax.set_xlabel("Principal Component 1", fontsize=12)
+    ax.set_ylabel("Principal Component 2", fontsize=12)
+    ax.grid(True)
 
     img = io.BytesIO()
     plt.tight_layout()
@@ -84,18 +91,25 @@ def perform_pca(df):
 
 def perform_clustering(df):
     numeric_df = df.select_dtypes(include=['int64', 'float64'])
-    if numeric_df.empty:
+    if numeric_df.empty or len(numeric_df.columns) < 2:
         return None
 
-    kmeans = KMeans(n_clusters=3)
+    kmeans = KMeans(n_clusters=3, random_state=42)
     clusters = kmeans.fit_predict(numeric_df)
 
     plt.clf()
     fig, ax = plt.subplots(figsize=(8, 6))
-    scatter = ax.scatter(numeric_df.iloc[:, 0], numeric_df.iloc[:, 1], c=clusters, cmap='viridis', alpha=0.7)
-    ax.set_title("KMeans Clustering")
-    ax.set_xlabel(numeric_df.columns[0])
-    ax.set_ylabel(numeric_df.columns[1])
+    scatter = ax.scatter(
+        numeric_df.iloc[:, 0],
+        numeric_df.iloc[:, 1],
+        c=clusters,
+        cmap='viridis',
+        alpha=0.7
+    )
+    ax.set_title("KMeans Clustering (3 Groups)", fontsize=14)
+    ax.set_xlabel(numeric_df.columns[0], fontsize=12)
+    ax.set_ylabel(numeric_df.columns[1], fontsize=12)
+    ax.grid(True)
 
     img = io.BytesIO()
     plt.tight_layout()
@@ -145,22 +159,6 @@ def analyze():
         print("Error processing file:", str(e))
         return render_template('index.html', error=str(e))
 
-@app.route('/view_cleaned_data')
-def view_cleaned_data():
-    if 'file' not in request.files:
-        return render_template('index.html', error='No file uploaded')
-
-    file = request.files['file']
-    if file.filename == '':
-        return render_template('index.html', error='No file selected')
-
-    try:
-        df = pd.read_csv(file)
-        df = filter_outliers(df)
-        cleaned_data = df.to_html(classes='table', index=False)
-        return render_template('cleaned_data.html', cleaned_data=cleaned_data)
-    except Exception as e:
-        return render_template('index.html', error=str(e))
 
 @atexit.register
 def cleanup_on_shutdown():
