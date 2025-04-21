@@ -8,9 +8,16 @@ import io
 import base64
 import os
 import atexit
+import numpy as np
 from sklearn.decomposition import PCA
 from sklearn.cluster import KMeans
 from sklearn.preprocessing import StandardScaler
+from scipy import stats
+
+# Set the style for all plots
+plt.style.use('seaborn-v0_8')
+sns.set_theme(style="whitegrid")
+sns.set_palette("husl")
 
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = 'uploads'
@@ -33,32 +40,67 @@ def filter_outliers(df):
 
 def generate_plot(df, column):
     plt.clf()
-    fig, ax = plt.subplots(figsize=(8, 5))
-
+    
+    # Determine the data type and create appropriate visualization
     if df[column].dtype in ['int64', 'float64']:
-        sns.histplot(data=df, x=column, ax=ax, kde=True, color='skyblue', edgecolor='black')
-        ax.set_title(f'Distribution of "{column}"', fontsize=14)
-        ax.set_xlabel(column, fontsize=12)
-        ax.set_ylabel("Frequency", fontsize=12)
+        # Create a figure with two subplots
+        fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(15, 6))
+        
+        # Histogram with KDE
+        sns.histplot(data=df, x=column, ax=ax1, kde=True, 
+                    color='#3498db', edgecolor='black', alpha=0.7)
+        ax1.set_title(f'Distribution of "{column}"', fontsize=14, pad=20)
+        ax1.set_xlabel(column, fontsize=12)
+        ax1.set_ylabel("Frequency", fontsize=12)
+        
+        # Box plot
+        sns.boxplot(y=df[column], ax=ax2, color='#2ecc71')
+        ax2.set_title(f'Box Plot of "{column}"', fontsize=14, pad=20)
+        ax2.set_ylabel(column, fontsize=12)
+        
+        # Add statistics annotations
+        stats_text = f"""
+        Mean: {df[column].mean():.2f}
+        Median: {df[column].median():.2f}
+        Std Dev: {df[column].std():.2f}
+        Skewness: {df[column].skew():.2f}
+        """
+        fig.text(0.99, 0.5, stats_text, fontsize=10, 
+                verticalalignment='center', bbox=dict(facecolor='white', alpha=0.8))
 
     elif df[column].dtype == 'object':
-        value_counts = df[column].value_counts().nlargest(10)
-        if len(value_counts) > 1:
-            sns.barplot(x=value_counts.index, y=value_counts.values, ax=ax, palette='muted')
-            ax.set_title(f'Top 10 Most Frequent Values in "{column}"', fontsize=14)
-            ax.set_xlabel(column, fontsize=12)
-            ax.set_ylabel("Count", fontsize=12)
-            ax.set_xticklabels(value_counts.index, rotation=45, ha='right')
-        else:
-            ax.pie(value_counts.values, labels=value_counts.index, autopct='%1.1f%%')
-            ax.set_title(f'Pie Chart of "{column}"', fontsize=14)
+        value_counts = df[column].value_counts()
+        fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(15, 6))
+        
+        # Bar plot for top 10 values
+        top_values = value_counts.nlargest(10)
+        sns.barplot(x=top_values.values, y=top_values.index, ax=ax1, 
+                   palette='viridis', orient='h')
+        ax1.set_title(f'Top 10 Most Frequent Values in "{column}"', fontsize=14, pad=20)
+        ax1.set_xlabel("Count", fontsize=12)
+        ax1.set_ylabel(column, fontsize=12)
+        
+        # Pie chart for top 5 values
+        top_5 = value_counts.nlargest(5)
+        ax2.pie(top_5.values, labels=top_5.index, autopct='%1.1f%%',
+                colors=sns.color_palette('pastel'), startangle=90)
+        ax2.set_title(f'Top 5 Values Distribution', fontsize=14, pad=20)
+        
+        # Add statistics annotations
+        stats_text = f"""
+        Total Unique Values: {len(value_counts)}
+        Most Common: {value_counts.index[0]}
+        Least Common: {value_counts.index[-1]}
+        """
+        fig.text(0.99, 0.5, stats_text, fontsize=10, 
+                verticalalignment='center', bbox=dict(facecolor='white', alpha=0.8))
 
     else:
         return None
 
     plt.tight_layout()
     img = io.BytesIO()
-    plt.savefig(img, format='png', bbox_inches='tight')
+    plt.savefig(img, format='png', bbox_inches='tight', dpi=300)
     img.seek(0)
     plt.close(fig)
     return base64.b64encode(img.getvalue()).decode()
@@ -75,16 +117,30 @@ def perform_pca(df):
     pca_result = pca.fit_transform(scaled_df)
 
     plt.clf()
-    fig, ax = plt.subplots(figsize=(8, 6))
-    scatter = ax.scatter(pca_result[:, 0], pca_result[:, 1], alpha=0.7, c='royalblue')
-    ax.set_title("PCA Projection (2 Components)", fontsize=14)
-    ax.set_xlabel("Principal Component 1", fontsize=12)
-    ax.set_ylabel("Principal Component 2", fontsize=12)
-    ax.grid(True)
+    fig, ax = plt.subplots(figsize=(10, 8))
+    
+    # Create scatter plot with density
+    scatter = ax.scatter(pca_result[:, 0], pca_result[:, 1], 
+                        alpha=0.6, c='#3498db', s=50)
+    
+    # Add explained variance ratio to the title
+    explained_var = pca.explained_variance_ratio_
+    ax.set_title(f"PCA Projection\nExplained Variance: {explained_var[0]:.1%} + {explained_var[1]:.1%}", 
+                fontsize=14, pad=20)
+    
+    ax.set_xlabel(f"Principal Component 1 ({explained_var[0]:.1%})", fontsize=12)
+    ax.set_ylabel(f"Principal Component 2 ({explained_var[1]:.1%})", fontsize=12)
+    
+    # Add grid and styling
+    ax.grid(True, linestyle='--', alpha=0.7)
+    sns.despine(ax=ax, offset=10)
+    
+    # Add colorbar for density
+    plt.colorbar(scatter, label='Density')
 
     img = io.BytesIO()
     plt.tight_layout()
-    plt.savefig(img, format='png')
+    plt.savefig(img, format='png', dpi=300)
     img.seek(0)
     plt.close(fig)
     return base64.b64encode(img.getvalue()).decode()
@@ -94,26 +150,76 @@ def perform_clustering(df):
     if numeric_df.empty or len(numeric_df.columns) < 2:
         return None
 
-    kmeans = KMeans(n_clusters=3, random_state=42)
+    # Determine optimal number of clusters using elbow method
+    distortions = []
+    K = range(1, 10)
+    for k in K:
+        kmeans = KMeans(n_clusters=k, random_state=42)
+        kmeans.fit(numeric_df)
+        distortions.append(kmeans.inertia_)
+
+    # Find the elbow point
+    elbow_point = np.argmin(np.diff(distortions)) + 1
+    optimal_k = min(max(2, elbow_point), 5)  # Limit between 2 and 5 clusters
+
+    kmeans = KMeans(n_clusters=optimal_k, random_state=42)
     clusters = kmeans.fit_predict(numeric_df)
 
     plt.clf()
-    fig, ax = plt.subplots(figsize=(8, 6))
-    scatter = ax.scatter(
+    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(15, 6))
+    
+    # Scatter plot with clusters
+    scatter = ax1.scatter(
         numeric_df.iloc[:, 0],
         numeric_df.iloc[:, 1],
         c=clusters,
         cmap='viridis',
-        alpha=0.7
+        alpha=0.7,
+        s=50
     )
-    ax.set_title("KMeans Clustering (3 Groups)", fontsize=14)
-    ax.set_xlabel(numeric_df.columns[0], fontsize=12)
-    ax.set_ylabel(numeric_df.columns[1], fontsize=12)
-    ax.grid(True)
+    ax1.set_title(f"KMeans Clustering ({optimal_k} Groups)", fontsize=14, pad=20)
+    ax1.set_xlabel(numeric_df.columns[0], fontsize=12)
+    ax1.set_ylabel(numeric_df.columns[1], fontsize=12)
+    ax1.grid(True, linestyle='--', alpha=0.7)
+    
+    # Elbow plot
+    ax2.plot(K, distortions, 'bx-')
+    ax2.plot(optimal_k, distortions[optimal_k-1], 'ro', markersize=10)
+    ax2.set_title('Elbow Method for Optimal K', fontsize=14, pad=20)
+    ax2.set_xlabel('Number of clusters (K)', fontsize=12)
+    ax2.set_ylabel('Distortion', fontsize=12)
+    ax2.grid(True, linestyle='--', alpha=0.7)
 
     img = io.BytesIO()
     plt.tight_layout()
-    plt.savefig(img, format='png')
+    plt.savefig(img, format='png', dpi=300)
+    img.seek(0)
+    plt.close(fig)
+    return base64.b64encode(img.getvalue()).decode()
+
+def generate_correlation_heatmap(df):
+    numeric_df = df.select_dtypes(include=['int64', 'float64'])
+    if numeric_df.empty or len(numeric_df.columns) < 2:
+        return None
+
+    plt.clf()
+    fig, ax = plt.subplots(figsize=(12, 10))
+    
+    # Calculate correlation matrix
+    corr = numeric_df.corr()
+    
+    # Create heatmap
+    sns.heatmap(corr, annot=True, cmap='coolwarm', center=0, 
+                square=True, linewidths=.5, cbar_kws={"shrink": .8}, 
+                fmt='.2f', ax=ax)
+    
+    ax.set_title('Correlation Heatmap', fontsize=14, pad=20)
+    plt.xticks(rotation=45, ha='right')
+    plt.yticks(rotation=0)
+
+    img = io.BytesIO()
+    plt.tight_layout()
+    plt.savefig(img, format='png', dpi=300)
     img.seek(0)
     plt.close(fig)
     return base64.b64encode(img.getvalue()).decode()
@@ -135,7 +241,8 @@ def analyze():
             'total_rows': len(df),
             'total_columns': len(df.columns),
             'columns': list(df.columns),
-            'missing_values': df.isnull().sum().to_dict()
+            'missing_values': df.isnull().sum().to_dict(),
+            'data_types': df.dtypes.astype(str).to_dict()
         }
 
         plots = {}
@@ -146,13 +253,15 @@ def analyze():
 
         pca_plot = perform_pca(df)
         clustering_plot = perform_clustering(df)
+        correlation_plot = generate_correlation_heatmap(df)
 
         return render_template(
             'results.html',
             stats=stats,
             plots=plots,
             pca_plot=pca_plot,
-            clustering_plot=clustering_plot
+            clustering_plot=clustering_plot,
+            correlation_plot=correlation_plot
         )
 
     except Exception as e:
