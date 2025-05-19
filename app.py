@@ -40,7 +40,7 @@ def filter_outliers(df):
 
 def generate_plot(df, column):
     plt.clf()
-    
+
     # Determine the data type and create appropriate visualization
     if df[column].dtype in ['int64', 'float64']:
         # Create a figure with two subplots
@@ -267,7 +267,6 @@ def analyze():
     except Exception as e:
         print("Error processing file:", str(e))
         return render_template('index.html', error=str(e))
-
 
 @atexit.register
 def cleanup_on_shutdown():

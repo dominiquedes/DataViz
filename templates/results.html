@@ -3,66 +3,85 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Analysis Results</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <title>Data Analysis Results</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .plot-container {
+            margin-bottom: 2rem;
+        }
+        .plot-container img {
+            max-width: 100%;
+            height: auto;
+        }
+        .stats-card {
+            margin-bottom: 1rem;
+        }
+    </style>
 </head>
 <body>
-    <div class="container">
-        <div class="card">
-            <h2>Analysis Results</h2>
+    <div class="container mt-4">
+        <h1 class="mb-4">Data Analysis Results</h1>
             
-            <div class="stats-grid">
-                <div class="stat-card">
-                    <h4>Dataset Overview</h4>
+        <!-- Statistics Section -->
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <div class="card stats-card">
+                    <div class="card-body">
+                        <h5 class="card-title">Dataset Statistics</h5>
                     <p>Total Rows: {{ stats.total_rows }}</p>
                     <p>Total Columns: {{ stats.total_columns }}</p>
                 </div>
-                
-                <div class="stat-card">
-                    <h4>Columns</h4>
-                    <ul>
-                        {% for column in stats.columns %}
-                        <li>{{ column }}</li>
-                        {% endfor %}
-                    </ul>
                 </div>
-                
-                <div class="stat-card">
-                    <h4>Missing Values</h4>
+            </div>
+            <div class="col-md-6">
+                <div class="card stats-card">
+                    <div class="card-body">
+                        <h5 class="card-title">Missing Values</h5>
                     <ul>
                         {% for column, count in stats.missing_values.items() %}
                         <li>{{ column }}: {{ count }}</li>
                         {% endfor %}
                     </ul>
+                    </div>
+                </div>
                 </div>
             </div>
 
-            <h3>Visualizations</h3>
-            <div class="visualization-grid">
+        <!-- Column Plots -->
+        <h2 class="mb-3">Column Analysis</h2>
+        <div class="row">
                 {% for column, plot in plots.items() %}
-                <div class="viz-card">
-                    <h4>{{ column }}</h4>
-                    <img src="data:image/png;base64,{{ plot }}" alt="Plot for {{ column }}">
+            <div class="col-md-6 plot-container">
+                <img src="data:image/png;base64,{{ plot }}" alt="{{ column }} plot" class="img-fluid">
                 </div>
                 {% endfor %}
             </div>
 
+        <!-- PCA Plot -->
             {% if pca_plot %}
-            <h3>Principal Component Analysis</h3>
-            <div class="viz-card">
-                <img src="data:image/png;base64,{{ pca_plot }}" alt="PCA Plot">
+        <h2 class="mb-3 mt-4">PCA Analysis</h2>
+        <div class="plot-container">
+            <img src="data:image/png;base64,{{ pca_plot }}" alt="PCA plot" class="img-fluid">
             </div>
             {% endif %}
 
+        <!-- Clustering Plot -->
             {% if clustering_plot %}
-            <h3>K-Means Clustering</h3>
-            <div class="viz-card">
-                <img src="data:image/png;base64,{{ clustering_plot }}" alt="Clustering Plot">
+        <h2 class="mb-3 mt-4">Clustering Analysis</h2>
+        <div class="plot-container">
+            <img src="data:image/png;base64,{{ clustering_plot }}" alt="Clustering plot" class="img-fluid">
             </div>
             {% endif %}
 
-            <a href="/" class="back-link">← Back to Upload</a>
+        <!-- Correlation Heatmap -->
+        {% if correlation_plot %}
+        <h2 class="mb-3 mt-4">Correlation Analysis</h2>
+        <div class="plot-container">
+            <img src="data:image/png;base64,{{ correlation_plot }}" alt="Correlation heatmap" class="img-fluid">
         </div>
+        {% endif %}
     </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
