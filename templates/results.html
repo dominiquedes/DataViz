@@ -3,83 +3,277 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Data Analysis Results</title>
+    <title>Your Data Analysis Results - Data Viz</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
-        .plot-container {
-            margin-bottom: 2rem;
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: #ffffff;
+            color: #1a1a1a;
+            line-height: 1.6;
+            padding: 40px 20px;
+        }
+
+        .main-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header-section {
+            background: #fff;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 40px;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .header-section h1 {
+            font-size: 2rem;
+            font-weight: 600;
+            color: #1a1a1a;
+            margin-bottom: 10px;
+        }
+
+        .header-section p {
+            color: #666;
+            font-size: 1rem;
+            margin-bottom: 20px;
+        }
+
+        .back-btn {
+            display: inline-block;
+            background: #1a1a1a;
+            color: #fff;
+            padding: 12px 24px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-weight: 500;
+            transition: background 0.2s;
+        }
+
+        .back-btn:hover {
+            background: #333;
+            color: #fff;
+        }
+
+        .stats-section {
+            background: #fff;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 40px;
+            margin-bottom: 30px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+
+        .stat-card {
+            background: #fafafa;
+            padding: 20px;
+            border-radius: 6px;
+            border-left: 3px solid #1a1a1a;
+        }
+
+        .stat-card h5 {
+            font-size: 1rem;
+            font-weight: 600;
+            color: #1a1a1a;
+            margin-bottom: 12px;
+        }
+
+        .stat-card p, .stat-card li {
+            color: #666;
+            margin-bottom: 6px;
+            font-size: 0.95rem;
+        }
+
+        .stat-card ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #1a1a1a;
+            margin-bottom: 25px;
+        }
+
+        .plots-section {
+            background: #fff;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 40px;
+            margin-bottom: 30px;
+        }
+
+        .plot-container {
+            margin-bottom: 30px;
+            background: #fafafa;
+            padding: 20px;
+            border-radius: 6px;
+        }
+
         .plot-container img {
             max-width: 100%;
             height: auto;
+            display: block;
         }
-        .stats-card {
-            margin-bottom: 1rem;
+
+        .plot-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+            gap: 20px;
+        }
+
+        .support-footer {
+            background: #fafafa;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 30px;
+            text-align: center;
+            margin-top: 30px;
+        }
+
+        .support-footer h4 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #1a1a1a;
+            margin-bottom: 10px;
+        }
+
+        .support-footer p {
+            color: #666;
+            font-size: 0.95rem;
+            margin-bottom: 15px;
+        }
+
+        .coffee-link {
+            display: inline-block;
+            background: #1a1a1a;
+            color: #fff;
+            padding: 10px 20px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 0.95rem;
+            transition: background 0.2s;
+        }
+
+        .coffee-link:hover {
+            background: #333;
+            color: #fff;
+        }
+
+        @media (max-width: 768px) {
+            .header-section h1 {
+                font-size: 1.5rem;
+            }
+            .plot-grid {
+                grid-template-columns: 1fr;
+            }
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
         }
     </style>
 </head>
 <body>
-    <div class="container mt-4">
-        <h1 class="mb-4">Data Analysis Results</h1>
-            
+    <div class="main-container">
+        <!-- Header -->
+        <div class="header-section">
+            <h1>Analysis Results</h1>
+            <p>Your data has been analyzed. Explore the insights below.</p>
+            <a href="/" class="back-btn">Analyze Another File</a>
+        </div>
+
         <!-- Statistics Section -->
-        <div class="row mb-4">
-            <div class="col-md-6">
-                <div class="card stats-card">
-                    <div class="card-body">
-                        <h5 class="card-title">Dataset Statistics</h5>
-                    <p>Total Rows: {{ stats.total_rows }}</p>
-                    <p>Total Columns: {{ stats.total_columns }}</p>
+        <div class="stats-section">
+            <h2 class="section-title">Dataset Overview</h2>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <h5>Dataset Statistics</h5>
+                    <p><strong>Total Rows:</strong> {{ stats.total_rows }}</p>
+                    <p><strong>Total Columns:</strong> {{ stats.total_columns }}</p>
                 </div>
-                </div>
-            </div>
-            <div class="col-md-6">
-                <div class="card stats-card">
-                    <div class="card-body">
-                        <h5 class="card-title">Missing Values</h5>
+                <div class="stat-card">
+                    <h5>Missing Values</h5>
                     <ul>
                         {% for column, count in stats.missing_values.items() %}
-                        <li>{{ column }}: {{ count }}</li>
+                        <li><strong>{{ column }}:</strong> {{ count }}</li>
                         {% endfor %}
                     </ul>
-                    </div>
-                </div>
                 </div>
             </div>
+        </div>
 
         <!-- Column Plots -->
-        <h2 class="mb-3">Column Analysis</h2>
-        <div class="row">
+        {% if plots %}
+        <div class="plots-section">
+            <h2 class="section-title">Column Analysis</h2>
+            <div class="plot-grid">
                 {% for column, plot in plots.items() %}
-            <div class="col-md-6 plot-container">
-                <img src="data:image/png;base64,{{ plot }}" alt="{{ column }} plot" class="img-fluid">
+                <div class="plot-container">
+                    <img src="data:image/png;base64,{{ plot }}" alt="{{ column }} plot" class="img-fluid">
                 </div>
                 {% endfor %}
             </div>
+        </div>
+        {% endif %}
 
         <!-- PCA Plot -->
-            {% if pca_plot %}
-        <h2 class="mb-3 mt-4">PCA Analysis</h2>
-        <div class="plot-container">
-            <img src="data:image/png;base64,{{ pca_plot }}" alt="PCA plot" class="img-fluid">
+        {% if pca_plot %}
+        <div class="plots-section">
+            <h2 class="section-title">PCA Analysis</h2>
+            <div class="plot-container">
+                <img src="data:image/png;base64,{{ pca_plot }}" alt="PCA plot" class="img-fluid">
             </div>
-            {% endif %}
+        </div>
+        {% endif %}
 
         <!-- Clustering Plot -->
-            {% if clustering_plot %}
-        <h2 class="mb-3 mt-4">Clustering Analysis</h2>
-        <div class="plot-container">
-            <img src="data:image/png;base64,{{ clustering_plot }}" alt="Clustering plot" class="img-fluid">
+        {% if clustering_plot %}
+        <div class="plots-section">
+            <h2 class="section-title">Clustering Analysis</h2>
+            <div class="plot-container">
+                <img src="data:image/png;base64,{{ clustering_plot }}" alt="Clustering plot" class="img-fluid">
             </div>
-            {% endif %}
+        </div>
+        {% endif %}
 
         <!-- Correlation Heatmap -->
         {% if correlation_plot %}
-        <h2 class="mb-3 mt-4">Correlation Analysis</h2>
-        <div class="plot-container">
-            <img src="data:image/png;base64,{{ correlation_plot }}" alt="Correlation heatmap" class="img-fluid">
+        <div class="plots-section">
+            <h2 class="section-title">Correlation Analysis</h2>
+            <div class="plot-container">
+                <img src="data:image/png;base64,{{ correlation_plot }}" alt="Correlation heatmap" class="img-fluid">
+            </div>
         </div>
         {% endif %}
+
+        <!-- Footer CTA -->
+        <div class="header-section" style="margin-top: 30px;">
+            <h3 style="font-size: 1.3rem; margin-bottom: 15px; font-weight: 600;">Ready to analyze more data?</h3>
+            <p style="margin-bottom: 20px; color: #666;">Upload another CSV file and get instant insights</p>
+            <a href="/" class="back-btn">Analyze Another File</a>
+        </div>
+
+        <!-- Support Footer -->
+        <div class="support-footer">
+            <h4>Support Data Viz</h4>
+            <p>Data Viz is completely free. Your donations help us upgrade processing power to make the service faster and more efficient for everyone.</p>
+            <a href="https://buymeacoffee.com/engineerdom" target="_blank" rel="noopener noreferrer" class="coffee-link">Support Data Viz</a>
+        </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>

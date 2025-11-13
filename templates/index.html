@@ -3,154 +3,391 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CSV Data Visualizer</title>
+    <title>Data Viz - Free CSV Data Visualizer | Transform Your Data Instantly</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-    <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
     <style>
-        :root {
-            --blue-main: #2563eb;
-            --blue-light: #60a5fa;
-            --blue-dark: #1e40af;
-            --blue-bg: #eff6ff;
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
-        .upload-zone {
-            border: 2px dashed var(--blue-main);
-            border-radius: 20px;
-            background: var(--blue-bg);
-            padding: 40px 20px;
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: #ffffff;
+            color: #1a1a1a;
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        .main-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 60px 20px;
+        }
+
+        .header {
             text-align: center;
-            transition: background 0.3s, border-color 0.3s;
-            cursor: pointer;
-            position: relative;
-            overflow: hidden;
+            margin-bottom: 50px;
         }
-        .upload-zone.dragover {
-            background: var(--blue-light);
-            border-color: var(--blue-dark);
-            animation: bounce 0.5s;
-        }
-        @keyframes bounce {
-            0% { transform: scale(1); }
-            30% { transform: scale(1.05); }
-            60% { transform: scale(0.97); }
-            100% { transform: scale(1); }
-        }
-        .upload-icon {
-            font-size: 3.5rem;
-            color: var(--blue-main);
+
+        .site-name {
+            font-size: 2rem;
+            font-weight: 600;
+            color: #1a1a1a;
             margin-bottom: 10px;
-            transition: color 0.3s;
         }
+
+        .free-badge {
+            display: inline-block;
+            background: #f5f5f5;
+            padding: 6px 16px;
+            border-radius: 4px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: #666;
+            margin-bottom: 20px;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 600;
+            color: #1a1a1a;
+            margin-bottom: 15px;
+            line-height: 1.2;
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            color: #666;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .upload-card {
+            background: #fff;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 40px;
+            margin-bottom: 40px;
+        }
+
+        .upload-zone {
+            border: 2px dashed #ccc;
+            border-radius: 8px;
+            background: #fafafa;
+            padding: 60px 20px;
+            text-align: center;
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+
+        .upload-zone:hover {
+            border-color: #999;
+            background: #f5f5f5;
+        }
+
+        .upload-zone.dragover {
+            border-color: #333;
+            background: #f0f0f0;
+        }
+
+        .upload-icon {
+            font-size: 3rem;
+            color: #666;
+            margin-bottom: 15px;
+        }
+
         .upload-zone.dragover .upload-icon {
-            color: var(--blue-dark);
+            color: #333;
         }
+
         .upload-zone input[type="file"] {
             display: none;
         }
 
-        #videoIcon {
-            border-radius: 50%;
-            width: 200px;
-            height: 200px;
+        .file-label {
+            font-size: 1rem;
+            color: #666;
+            margin-top: 10px;
+            min-height: 1.5em;
         }
 
-        .file-label {
-            font-size: 1.1rem;
-            color: #2563eb;
-            margin-top: 10px;
-            margin-bottom: 0;
-            min-height: 1.5em;
-            transition: color 0.3s;
+        .file-label.has-file {
+            color: #1a1a1a;
+            font-weight: 500;
         }
+
         .upload-btn {
-            margin-top: 18px;
-            background: linear-gradient(90deg, var(--blue-main) 60%, var(--blue-light) 100%);
+            margin-top: 25px;
+            background: #1a1a1a;
             border: none;
             color: #fff;
-            font-weight: bold;
-            border-radius: 30px;
-            padding: 12px 32px;
-            font-size: 1.2rem;
-            box-shadow: 0 2px 8px rgba(37,99,235,0.08);
-            transition: background 0.3s, transform 0.2s;
+            font-weight: 500;
+            border-radius: 6px;
+            padding: 14px 32px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background 0.2s;
         }
-        .upload-btn:hover, .upload-btn:focus {
-            background: linear-gradient(90deg, var(--blue-dark) 0%, var(--blue-main) 100%);
-            transform: scale(1.05);
+
+        .upload-btn:hover {
+            background: #333;
         }
+
         .upload-progress {
-            height: 6px;
-            background: linear-gradient(90deg, var(--blue-main), var(--blue-light));
-            border-radius: 3px;
-            margin-top: 10px;
+            height: 3px;
+            background: #1a1a1a;
+            border-radius: 2px;
+            margin-top: 15px;
             width: 0;
             transition: width 0.3s;
         }
-        @keyframes bounceIcon {
-            0%   { transform: translateY(0); }
-            60%  { transform: translateY(-18px); }
-            100% { transform: translateY(0); }
+
+        .info-section {
+            background: #fff;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 40px;
+            margin-bottom: 40px;
+        }
+
+        .info-section h2 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #1a1a1a;
+            margin-bottom: 25px;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .info-item {
+            padding: 15px;
+            background: #fafafa;
+            border-radius: 6px;
+        }
+
+        .info-item strong {
+            display: block;
+            color: #1a1a1a;
+            margin-bottom: 5px;
+        }
+
+        .info-item span {
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .steps-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .steps-list li {
+            padding: 12px 0;
+            border-bottom: 1px solid #e0e0e0;
+            color: #666;
+        }
+
+        .steps-list li:last-child {
+            border-bottom: none;
+        }
+
+        .support-section {
+            background: #fafafa;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 30px;
+            text-align: center;
+            margin-top: 40px;
+        }
+
+        .support-section h3 {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #1a1a1a;
+            margin-bottom: 10px;
+        }
+
+        .support-section p {
+            color: #666;
+            font-size: 0.95rem;
+            margin-bottom: 15px;
+        }
+
+        .coffee-btn {
+            display: inline-block;
+            background: #1a1a1a;
+            color: #fff;
+            padding: 10px 20px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 0.95rem;
+            transition: background 0.2s;
+        }
+
+        .coffee-btn:hover {
+            background: #333;
+            color: #fff;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2rem;
+            }
+            .upload-card, .info-section {
+                padding: 30px 20px;
+            }
+        }
+
+        #videoIconWrapper {
+            position: fixed;
+            bottom: 32px;
+            right: 32px;
+            z-index: 1050;
+            width: 60px;
+            height: 60px;
+            cursor: pointer;
+        }
+
+        #videoIconBtn {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: #1a1a1a;
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+            transition: background 0.2s;
+        }
+
+        #videoIconBtn:hover {
+            background: #333;
+        }
+
+        #videoIconBtn img {
+            width: 28px;
+            height: 28px;
+            filter: brightness(0) invert(1);
+        }
+
+        .loading-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(255, 255, 255, 0.95);
+            z-index: 9999;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+        }
+
+        .loading-overlay.active {
+            display: flex;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid #e0e0e0;
+            border-top: 4px solid #1a1a1a;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .loading-text {
+            margin-top: 20px;
+            font-size: 1.1rem;
+            color: #666;
+            font-weight: 500;
+        }
+
+        .loading-details {
+            margin-top: 10px;
+            font-size: 0.9rem;
+            color: #999;
         }
     </style>
 </head>
 <body>
-    <div class="container mt-3">
-        <div class="row justify-content-center">
-            <div class="col-md-8">
-                <div class="card p-4 shadow-sm">
-                    <h2 class="mb-4 text-center">Upload Your CSV File</h2>
-                    {% if error %}
-                        <div class="alert alert-danger">{{ error }}</div>
-                    {% endif %}
-                    <form action="/analyze" method="post" enctype="multipart/form-data" class="upload-form">
-                        <div class="mb-3">
-                            <div class="upload-zone" id="uploadZone">
-                                <div class="upload-icon">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" fill="currentColor" class="bi bi-cloud-arrow-up" viewBox="0 0 16 16">
-                                        <path fill-rule="evenodd" d="M8 0a5.53 5.53 0 0 1 5.473 4.684A4.5 4.5 0 0 1 12.5 13H4a4 4 0 0 1-.326-7.984A5.53 5.53 0 0 1 8 0Zm.5 7.5V11a.5.5 0 0 1-1 0V7.5H5.354a.5.5 0 0 1-.353-.854l2.146-2.147a.5.5 0 0 1 .707 0l2.146 2.147a.5.5 0 0 1-.353.854H8.5Z"/>
-                                    </svg>
-                                </div>
-                                <div class="file-label" id="fileLabel">Drag & Drop or Click to Select a CSV</div>
-                                <input class="form-control file-input" type="file" name="file" accept=".csv" required id="fileInput">
-                                <div class="upload-progress" id="progressBar"></div>
-                            </div>
-                        </div>
-                        <div class="d-grid">
-                            <button class="upload-btn" type="submit">Analyze</button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </div>
-
-        <!-- How it Works Section -->
-        <div class="row justify-content-center">
-            <div class="col-md-10">
-                <div class="card p-4 shadow-sm">
-                    <h3 class="mb-3 text-center">How it Works</h3>
-                    <div class="row align-items-center">
-                        <div class="col-md-5 text-center mb-3 mb-md-0">
-                            <img src="{{ url_for('static', filename='csv_to_graph.png') }}" alt="CSV to Graph" style="max-width: 250px; width: 100%; height: auto;">
-                        </div>
-                        <div class="col-md-7">
-                            <ul class="fs-5">
-                                <li>Upload your CSV file using the form above.</li>
-                                <li>The app automatically analyzes your data, removes outliers, and generates professional visualizations.</li>
-                                <li>See distributions, correlations, PCA, clustering, and more—instantly!</li>
-                                <li>No coding required. Just upload and explore your data visually.</li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="spinner"></div>
+        <div class="loading-text">Processing your data...</div>
+        <div class="loading-details">This may take a few moments</div>
     </div>
-    <!-- Bouncing Video Icon Bottom Right -->
-    <div id="videoIconWrapper" style="position: fixed; bottom: 32px; right: 32px; z-index: 1050; width: 100px; height: 100px; display: flex; align-items: center; justify-content: center; cursor: pointer; animation: bounceIcon 1.2s infinite alternate;">
-        <button id="videoIconBtn" style="width: 100px; height: 100px; border-radius: 50%; background: #2563eb; border: none; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 16px rgba(0,0,0,0.18);">
-            <img src="{{ url_for('static', filename='icons8-video-96.png') }}" alt="Video Icon" style="width: 48px; height: 48px; display: block;">
+    <div class="main-container">
+        <!-- Header -->
+        <div class="header">
+            <div class="site-name">Data Viz</div>
+            <div class="free-badge">100% Free - No Sign Up Required</div>
+            <h1>Transform Your Data Into Visualizations</h1>
+            <p>Upload your CSV file and get instant data analysis with charts and insights</p>
+            <p style="font-size: 0.95rem; color: #999; margin-top: 15px; max-width: 600px; margin-left: auto; margin-right: auto;">Donations help us upgrade processing power to make Data Viz faster and more efficient for everyone</p>
+        </div>
+
+        <!-- Upload Section -->
+        <div class="upload-card">
+            {% if error %}
+                <div class="alert alert-danger" role="alert" style="background: #fee; color: #c33; padding: 12px; border-radius: 6px; margin-bottom: 20px;">{{ error }}</div>
+            {% endif %}
+            <form action="/analyze" method="post" enctype="multipart/form-data" class="upload-form">
+                <div class="upload-zone" id="uploadZone">
+                    <div class="upload-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" fill="currentColor" viewBox="0 0 16 16">
+                            <path fill-rule="evenodd" d="M8 0a5.53 5.53 0 0 1 5.473 4.684A4.5 4.5 0 0 1 12.5 13H4a4 4 0 0 1-.326-7.984A5.53 5.53 0 0 1 8 0Zm.5 7.5V11a.5.5 0 0 1-1 0V7.5H5.354a.5.5 0 0 1-.353-.854l2.146-2.147a.5.5 0 0 1 .707 0l2.146 2.147a.5.5 0 0 1-.353.854H8.5Z"/>
+                        </svg>
+                    </div>
+                    <div class="file-label" id="fileLabel">Drag & Drop your CSV file here or click to browse</div>
+                    <input class="form-control file-input" type="file" name="file" accept=".csv" required id="fileInput">
+                    <div class="upload-progress" id="progressBar"></div>
+                </div>
+                <div style="text-align: center;">
+                    <button class="upload-btn" type="submit">Analyze</button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Info Section -->
+        <div class="info-section">
+            <h2>How It Works</h2>
+            <ul class="steps-list">
+                <li>Upload your CSV file using the form above</li>
+                <li>The app automatically analyzes your data, removes outliers, and generates visualizations</li>
+                <li>See distributions, correlations, PCA, clustering, and more—instantly</li>
+                <li>No coding required. Just upload and explore your data visually</li>
+            </ul>
+        </div>
+
+        <!-- Support Section -->
+        <div class="support-section">
+            <h3>Support Data Viz</h3>
+            <p>Data Viz is completely free to use. Your donations help us upgrade our processing infrastructure, making the service faster and more efficient for everyone.</p>
+            <p style="margin-top: 10px; font-size: 0.9rem; color: #999;">Every contribution goes directly toward improving performance and adding new features.</p>
+            <a href="https://buymeacoffee.com/engineerdom" target="_blank" rel="noopener noreferrer" class="coffee-btn" style="margin-top: 15px;">Support Data Viz</a>
+        </div>
+    </div>
+    <!-- Video Icon Bottom Right -->
+    <div id="videoIconWrapper">
+        <button id="videoIconBtn">
+            <img src="{{ url_for('static', filename='icons8-video-96.png') }}" alt="Watch Demo">
         </button>
     </div>
 
@@ -162,8 +399,8 @@
             <h5 class="modal-title" id="demoModalLabel">Demo Video</h5>
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
-          <div class="modal-body text-center">
-            <video id="demoVideo" width="100%" controls style="max-height: 60vh;">
+          <div class="modal-body text-center" style="padding: 0;">
+            <video id="demoVideo" width="100%" controls style="max-height: 60vh; display: block;">
               <source src="{{ url_for('static', filename='demo - data viz.mp4') }}" type="video/mp4">
               Your browser does not support the video tag.
             </video>
@@ -174,7 +411,7 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        // Fun drag-and-drop and animated upload
+        // Enhanced drag-and-drop and animated upload
         const uploadZone = document.getElementById('uploadZone');
         const fileInput = document.getElementById('fileInput');
         const fileLabel = document.getElementById('fileLabel');
@@ -201,37 +438,53 @@
 
         function updateFileLabel() {
             if (fileInput.files && fileInput.files[0]) {
-                fileLabel.textContent = `Selected: ${fileInput.files[0].name}`;
-                fileLabel.style.color = 'var(--blue-main)';
+                fileLabel.textContent = `✓ Selected: ${fileInput.files[0].name}`;
+                fileLabel.classList.add('has-file');
             } else {
-                fileLabel.textContent = 'Drag & Drop or Click to Select a CSV';
-                fileLabel.style.color = '#2563eb';
+                fileLabel.textContent = 'Drag & Drop your CSV file here or click to browse';
+                fileLabel.classList.remove('has-file');
             }
         }
 
-        // Progress bar animation on submit
-        document.querySelector('.upload-form').addEventListener('submit', function(e) {
+        // Show loading overlay on form submit
+        const loadingOverlay = document.getElementById('loadingOverlay');
+        const uploadForm = document.querySelector('.upload-form');
+        const uploadBtn = document.querySelector('.upload-btn');
+
+        uploadForm.addEventListener('submit', function(e) {
+            // Show loading overlay
+            loadingOverlay.classList.add('active');
+            
+            // Disable the submit button to prevent multiple submissions
+            uploadBtn.disabled = true;
+            uploadBtn.style.opacity = '0.6';
+            uploadBtn.style.cursor = 'not-allowed';
+            
+            // Progress bar animation
             progressBar.style.width = '0';
             let progress = 0;
             const interval = setInterval(() => {
-                progress += 4;
+                progress += 3;
                 progressBar.style.width = `${progress}%`;
-                if (progress >= 100) {
+                if (progress >= 95) {
                     clearInterval(interval);
+                    progressBar.style.width = '100%';
                 }
-            }, 15);
+            }, 20);
         });
 
-        // Bouncing icon click to open modal
+        // Video icon click handler
         document.addEventListener('DOMContentLoaded', function() {
           var videoIcon = document.getElementById('videoIconWrapper');
           var demoModal = new bootstrap.Modal(document.getElementById('demoModal'));
           var demoVideo = document.getElementById('demoVideo');
+          
           videoIcon.addEventListener('click', function() {
             demoModal.show();
             demoVideo.currentTime = 0;
             demoVideo.play();
           });
+          
           // Pause video when modal closes
           document.getElementById('demoModal').addEventListener('hidden.bs.modal', function () {
             demoVideo.pause();
