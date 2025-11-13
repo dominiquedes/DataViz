@@ -63,6 +63,54 @@
             color: #fff;
         }
 
+        .nav-menu {
+            background: #fff;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 30px;
+        }
+
+        .nav-menu h3 {
+            font-size: 1rem;
+            font-weight: 600;
+            color: #1a1a1a;
+            margin-bottom: 15px;
+        }
+
+        .nav-links {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .nav-link {
+            display: inline-block;
+            padding: 8px 16px;
+            background: #fafafa;
+            color: #1a1a1a;
+            text-decoration: none;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            border: 1px solid #e0e0e0;
+            transition: all 0.2s;
+        }
+
+        .nav-link:hover {
+            background: #1a1a1a;
+            color: #fff;
+            border-color: #1a1a1a;
+        }
+
+        .nav-link[style*="background: #1a1a1a"]:hover {
+            background: #333 !important;
+            border-color: #333 !important;
+        }
+
+        .section-anchor {
+            scroll-margin-top: 20px;
+        }
+
         .stats-section {
             background: #fff;
             border: 1px solid #e0e0e0;
@@ -185,6 +233,13 @@
             .stats-grid {
                 grid-template-columns: 1fr;
             }
+            .nav-links {
+                flex-direction: column;
+            }
+            .nav-link {
+                width: 100%;
+                text-align: center;
+            }
         }
     </style>
 </head>
@@ -197,8 +252,29 @@
             <a href="/" class="back-btn">Analyze Another File</a>
         </div>
 
+        <!-- Navigation Menu -->
+        <div class="nav-menu">
+            <h3>Jump to Section</h3>
+            <div class="nav-links">
+                <a href="#dataset-overview" class="nav-link">Dataset Overview</a>
+                {% if plots %}
+                <a href="#column-analysis" class="nav-link">Column Analysis</a>
+                {% endif %}
+                {% if pca_plot %}
+                <a href="#pca-analysis" class="nav-link">PCA Analysis</a>
+                {% endif %}
+                {% if clustering_plot %}
+                <a href="#clustering-analysis" class="nav-link">Clustering Analysis</a>
+                {% endif %}
+                {% if correlation_plot %}
+                <a href="#correlation-analysis" class="nav-link">Correlation Analysis</a>
+                {% endif %}
+                <a href="https://buymeacoffee.com/engineerdom" target="_blank" rel="noopener noreferrer" class="nav-link" style="background: #1a1a1a; color: #fff; border-color: #1a1a1a;">Support DataViz</a>
+            </div>
+        </div>
+
         <!-- Statistics Section -->
-        <div class="stats-section">
+        <div class="stats-section section-anchor" id="dataset-overview">
             <h2 class="section-title">Dataset Overview</h2>
             <div class="stats-grid">
                 <div class="stat-card">
@@ -219,7 +295,7 @@
 
         <!-- Column Plots -->
         {% if plots %}
-        <div class="plots-section">
+        <div class="plots-section section-anchor" id="column-analysis">
             <h2 class="section-title">Column Analysis</h2>
             <div class="plot-grid">
                 {% for column, plot in plots.items() %}
@@ -233,7 +309,7 @@
 
         <!-- PCA Plot -->
         {% if pca_plot %}
-        <div class="plots-section">
+        <div class="plots-section section-anchor" id="pca-analysis">
             <h2 class="section-title">PCA Analysis</h2>
             <div class="plot-container">
                 <img src="data:image/png;base64,{{ pca_plot }}" alt="PCA plot" class="img-fluid">
@@ -243,7 +319,7 @@
 
         <!-- Clustering Plot -->
         {% if clustering_plot %}
-        <div class="plots-section">
+        <div class="plots-section section-anchor" id="clustering-analysis">
             <h2 class="section-title">Clustering Analysis</h2>
             <div class="plot-container">
                 <img src="data:image/png;base64,{{ clustering_plot }}" alt="Clustering plot" class="img-fluid">
@@ -253,7 +329,7 @@
 
         <!-- Correlation Heatmap -->
         {% if correlation_plot %}
-        <div class="plots-section">
+        <div class="plots-section section-anchor" id="correlation-analysis">
             <h2 class="section-title">Correlation Analysis</h2>
             <div class="plot-container">
                 <img src="data:image/png;base64,{{ correlation_plot }}" alt="Correlation heatmap" class="img-fluid">
